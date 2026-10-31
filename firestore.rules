@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Paste the two UIDs from Firebase Console → Authentication → Users (same as js/config.js).
-    function isAdmin() { return request.auth != null && request.auth.uid == "2mhkGxTmlsVQG0NCLcRDSZgSJ8F2"; }
+    function isAdmin() { return request.auth != null && request.auth.uid == "jf6iaizJkrUoar3Vzvv6nZaGRIA3"; }
     function isHer()   { return request.auth != null && request.auth.uid == "XTR9TcajnTXxx4AM7lo5VwzCZWQ2"; }
 
     match /wishlists/{listId} {
