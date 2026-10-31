@@ -12,8 +12,8 @@ const form = document.getElementById("loginForm"), userEl = document.getElementB
 // A reason left by logout() (e.g. idle timeout) is shown once.
 try { const r = sessionStorage.getItem("lakeside-logout-reason"); if (r) msg.textContent = r; sessionStorage.removeItem("lakeside-logout-reason"); } catch (e) {}
 
-// Usernames: lowercase letters, digits, dot, dash, underscore. Anything else never reaches Firebase.
-const USERNAME = /^[a-z0-9._-]{3,40}$/;
+// Usernames: 2-40 lowercase letters, digits, dot, dash, underscore. Anything else never reaches Firebase.
+const USERNAME = /^[a-z0-9._-]{2,40}$/;
 let busy = false, fails = 0, lockedUntil = 0;
 
 // Already signed in? Go straight to the right page.
