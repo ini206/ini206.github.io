@@ -30,7 +30,10 @@ form.addEventListener("submit", async e => {
   if (busy) return;
   const now = Date.now();
   if (now < lockedUntil) { msg.textContent = `Too many tries. Wait ${Math.ceil((lockedUntil - now) / 1000)}s.`; return; }
-  const username = userEl.value.trim().toLowerCase(), password = passEl.value;
+  // Accept "dk" or the full "dk@bocun.com".
+  let username = userEl.value.trim().toLowerCase();
+  if (username.endsWith("@" + LOGIN_DOMAIN)) username = username.slice(0, -(LOGIN_DOMAIN.length + 1));
+  const password = passEl.value;
   if (!USERNAME.test(username) || !password) { msg.textContent = "Enter your username and password."; return; }
 
   busy = true; go.disabled = true; go.textContent = "Checking…"; msg.textContent = "";
