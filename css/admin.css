@@ -6,10 +6,10 @@ html:not([data-auth="ok"]) .wrap{visibility:hidden}
   color-scheme:light;
   --ink:#2E5566; --paper:#FFF7FB; --pink:#FF9CC6; --cyan:#C9F1F7; --mint:#C8F2DD; --muted:#5E8494; --alert:#C2416F;
   --title:"Press Start 2P", "Courier New", monospace;
-  --body:"Pixelify Sans", "Courier New", monospace;
+  --body:"VT323", "Courier New", monospace;
 }
 html{min-height:100%;background:linear-gradient(180deg,#86D3EA 0%,#B9E5F0 30%,#F2DCE6 60%,#FFC3D0 85%,#FFC8BC 100%) fixed}
-body{margin:0;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.4;
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:22px;line-height:1.3;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:calc(24px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
 .wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
@@ -26,9 +26,9 @@ form.login{padding:22px 20px;display:flex;flex-direction:column;gap:14px}
 label{display:flex;flex-direction:column;gap:6px;font-weight:600}
 input[type=email],input[type=password]{font:inherit;color:var(--ink);background:#fff;border:0;padding:10px 12px;box-shadow:inset 0 0 0 3px var(--cyan)}
 input[type=email]:focus,input[type=password]:focus{box-shadow:inset 0 0 0 3px var(--pink);outline:none}
-.msg{margin:0;color:var(--alert);min-height:1em;font-size:16px}
+.msg{margin:0;color:var(--alert);min-height:1em;font-size:20px}
 .muted{color:var(--muted);margin:0}
-.stats{display:flex;gap:10px;flex-wrap:wrap;font-size:15px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;font-size:20px}
 .stats span{background:var(--cyan);padding:3px 8px;font-variant-numeric:tabular-nums}
 .letter{padding:18px;display:flex;flex-direction:column;gap:12px}
 .letter.unseen{--f:#FFF0F5}
@@ -40,5 +40,7 @@ li label{flex-direction:row;align-items:flex-start;gap:10px;font-weight:600;curs
 li input{width:22px;height:22px;margin:2px 0 0;accent-color:#FF7EB6;flex:none}
 li span{min-width:0;overflow-wrap:anywhere}
 li.done span{text-decoration:line-through;color:var(--muted)}
+.btn.got{--f:#C8F2DD}.btn.got.on{--f:#FFE6A8}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
 .actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .empty{padding:22px 18px;text-align:center}

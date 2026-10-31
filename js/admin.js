@@ -1,5 +1,5 @@
 // Admin inbox: live lists from Firestore. Only loads after auth confirms the admin UID.
-import { db, requireRole, logout, startIdleTimer } from "./firebase.js?v=20261031c";
+import { db, requireRole, logout, startIdleTimer } from "./firebase.js?v=20261031d";
 import { collection, query, orderBy, onSnapshot, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
@@ -59,7 +59,18 @@ function render(docs) {
       pendingDelete = null; del.disabled = true;
       try { await deleteDoc(doc(db, "wishlists", d.id)); } catch (err) { del.disabled = false; $("inboxMsg").textContent = friendly(err.code); }
     };
-    act.append(Object.assign(document.createElement("span"), { className: "muted", textContent: `${items.length} wish${items.length === 1 ? "" : "es"}` }), del);
+    const allGot = items.length > 0 && bought.size === items.length;
+    const gotBtn = document.createElement("button"); gotBtn.type = "button"; gotBtn.className = "btn got px" + (allGot ? " on" : "");
+    gotBtn.textContent = allGot ? "Bought ✓" : "Mark bought";
+    gotBtn.title = allGot ? "Tap to unmark everything" : "Mark every wish in this list as bought (her bubbles will glow)";
+    gotBtn.onclick = async () => {
+      gotBtn.disabled = true;
+      try { await updateDoc(doc(db, "wishlists", d.id), { bought: allGot ? [] : items.map((_, i) => i) }); }
+      catch (err) { $("inboxMsg").textContent = friendly(err.code); }
+      finally { gotBtn.disabled = false; }
+    };
+    const row = document.createElement("div"); row.className = "btn-row"; row.append(gotBtn, del);
+    act.append(Object.assign(document.createElement("span"), { className: "muted", textContent: `${items.length} wish${items.length === 1 ? "" : "es"}` }), row);
     card.append(act); list.append(card);
   });
   // mark as seen after you've had a moment to look

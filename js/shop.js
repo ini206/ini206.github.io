@@ -1,7 +1,7 @@
 // Her shopping page: wish bubbles + send. Runs only after auth confirms her account.
-import { db, requireRole, logout } from "./firebase.js?v=20261031c";
-import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { TO_NAME } from "./config.js?v=20261031c";
+import { db, requireRole, logout } from "./firebase.js?v=20261031d";
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { TO_NAME } from "./config.js?v=20261031d";
 
 const user = await requireRole("her");
 document.documentElement.dataset.auth = "ok";
@@ -33,8 +33,13 @@ function render(){
   board.replaceChildren();countEl.textContent=items.length;sendBtn.disabled=!items.length;markSent();
   if(!items.length){const e=document.createElement("div");e.className="empty px";e.textContent="Your list is empty. Tap + to add your first wish!";board.append(e);return}
   items.forEach(it=>{const b=document.createElement("button");b.type="button";b.className="bubble px"+(it.id===justAdded?" new":"");
-    b.textContent=it.text;b.dataset.id=it.id;b.style.animationDelay=it.id===justAdded?"":(-(it.id%7)*.45)+"s";
-    b.setAttribute("aria-label",it.text+". Tap to edit, double tap to delete.");
+    const got=boughtTexts.has(norm(it.text));if(got)b.classList.add("got");
+    const fl=document.createElement("span");fl.className="flake";fl.setAttribute("aria-hidden","true");
+    const tx=document.createElement("span");tx.className="t";tx.textContent=it.text;
+    b.append(fl,tx);
+    for(let k=0;k<3;k++){const sp=document.createElement("span");sp.className="spark";sp.setAttribute("aria-hidden","true");b.append(sp)}
+    b.dataset.id=it.id;b.style.animationDelay=it.id===justAdded?"":(-(it.id%7)*.45)+"s";
+    b.setAttribute("aria-label",it.text+(got?" (taken care of ✿)":"")+". Tap to edit, double tap to delete.");
     b.addEventListener("pointerdown",()=>b.classList.add("hold"));b.addEventListener("pointerleave",()=>b.classList.remove("hold"));
     b.addEventListener("click",()=>tap(it.id,b));
     b.addEventListener("keydown",e=>{if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();remove(it.id,b)}});
@@ -82,3 +87,15 @@ sendForm.addEventListener("submit",async e=>{e.preventDefault();
   }catch(err){sendMsg.textContent="That didn't go through ("+(err&&err.code||"network error")+"). Try again in a moment.";}
   finally{sendGo.disabled=false;sendGo.textContent="Send ✉"}
 });
+
+/* ---------- glow sync: items he marked bought ---------- */
+// Rules only let her read lists she sent, so the query must filter on "by".
+function norm(t){return String(t).trim().toLowerCase()}
+var boughtTexts=new Set();
+onSnapshot(query(collection(db,"wishlists"),where("by","==",user.uid)),snap=>{
+  const next=new Set();
+  snap.docs.forEach(d=>{const x=d.data(),its=x.items||[];(x.bought||[]).forEach(i=>{if(its[i]!=null)next.add(norm(its[i]))})});
+  const changed=next.size!==boughtTexts.size||[...next].some(t=>!boughtTexts.has(t));
+  boughtTexts=next;
+  if(changed&&!main.hidden&&sheet.hidden)render();
+},()=>{/* offline or rules not updated yet: bubbles just don't glow */});

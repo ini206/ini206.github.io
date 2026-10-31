@@ -19,8 +19,9 @@ service cloud.firestore {
         && request.resource.data.note is string
         && request.resource.data.note.size() <= 300;
 
-      // Only you can read and delete lists.
-      allow read, delete: if isAdmin();
+      // You read and delete everything; she can read only the lists she sent (to see what glows).
+      allow read: if isAdmin() || (isHer() && resource.data.by == request.auth.uid);
+      allow delete: if isAdmin();
 
       // You can only change the "bought" ticks — never her words.
       allow update: if isAdmin()

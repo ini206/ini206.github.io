@@ -5,10 +5,10 @@
   --ink:#2E5566; --paper:#FFF7FB; --pink:#FF9CC6; --pink-d:#E2709F;
   --lav:#C9F1F7; --mint:#C8F2DD; --sky:#CDEBFF; --butter:#FFF0B3; --peach:#FFD8C7;
   --title:"Press Start 2P", "Courier New", monospace;
-  --body:"Pixelify Sans", "Courier New", monospace;
+  --body:"VT323", "Courier New", monospace;
 }
 html,body{height:100%}
-body{background:#FFD3DF;color:var(--ink);font-family:var(--body);font-size:18px;margin:0;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body{background:#FFD3DF;color:var(--ink);font-family:var(--body);font-size:22px;margin:0;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 canvas#world{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;z-index:0}
 .layer{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
@@ -23,7 +23,7 @@ canvas#world{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixel
 #intro{align-items:center;justify-content:center}
 .intro-card{max-width:420px;width:100%;padding:28px 22px;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
 .intro-card h1{font-family:var(--title);font-size:clamp(14px,4.2vw,18px);line-height:1.7;margin:0;font-weight:400;text-wrap:balance}
-.intro-card p{margin:0;font-size:18px;color:#5E8494}
+.intro-card p{margin:0;font-size:23px;color:#5E8494}
 .heart{display:block;width:40px;height:36px;image-rendering:pixelated;animation:bob 1.6s ease-in-out infinite}
 .btn{font-family:var(--title);font-size:13px;cursor:pointer;border:0;color:var(--ink);padding:14px 22px;--f:var(--pink);background:var(--f)}
 .btn:hover{--f:#FFB3D3}
@@ -36,15 +36,37 @@ canvas#world{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixel
 #main{gap:14px}
 .plaque{align-self:center;padding:10px 16px;font-family:var(--title);font-size:12px;letter-spacing:.04em;display:flex;gap:10px;align-items:center}
 .plaque .count{background:var(--pink);padding:4px 8px;font-variant-numeric:tabular-nums}
-.hint{align-self:center;font-size:15px;color:var(--ink);background:rgba(255,247,251,.8);padding:4px 10px}
-.board{flex:1;min-height:0;overflow-y:auto;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;gap:16px;padding:8px 4px 96px}
-.bubble{font-family:var(--body);font-size:19px;font-weight:600;color:var(--ink);cursor:pointer;border:0;max-width:min(320px,100%);
-  padding:12px 16px;text-align:left;overflow-wrap:anywhere;animation:bob 3.4s ease-in-out infinite;user-select:none}
-.bubble:nth-child(5n+1){--f:#FFE1EE}.bubble:nth-child(5n+2){--f:var(--lav)}.bubble:nth-child(5n+3){--f:var(--mint)}
-.bubble:nth-child(5n+4){--f:var(--sky)}.bubble:nth-child(5n){--f:var(--butter)}
+.hint{align-self:center;font-size:19px;color:var(--ink);background:rgba(255,247,251,.8);padding:4px 10px}
+.board{flex:1;min-height:0;overflow-y:auto;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;gap:34px 20px;padding:22px 10px 110px}
+/* ---- frosted winter bubbles: snow cap on top, icicles below, pixel snowflake ---- */
+.bubble{position:relative;font-family:var(--body);font-size:25px;line-height:1.05;color:var(--ink);cursor:pointer;border:0;max-width:min(320px,100%);
+  display:flex;align-items:center;gap:10px;padding:13px 18px 12px 14px;text-align:left;overflow-wrap:anywhere;user-select:none;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.75) 0 3px,transparent 3px),
+    linear-gradient(90deg,transparent 0 8px,rgba(255,255,255,.55) 8px 12px,transparent 12px);
+  background-repeat:no-repeat;animation:bob 3.4s ease-in-out infinite}
+.bubble::before{content:"";position:absolute;left:-7px;right:-7px;top:-13px;height:14px;pointer-events:none;
+  background:linear-gradient(#FFFFFF 0 70%,#DDEFF6 70%);clip-path:polygon(0 100%,0 55%,5% 55%,5% 25%,12% 25%,12% 5%,24% 5%,24% 35%,31% 35%,31% 15%,45% 15%,45% 45%,53% 45%,53% 0,66% 0,66% 30%,74% 30%,74% 10%,88% 10%,88% 40%,95% 40%,95% 60%,100% 60%,100% 100%)}
+.bubble::after{content:"";position:absolute;left:10px;right:10px;bottom:-15px;height:12px;pointer-events:none;
+  background:linear-gradient(#E9F8FC,#A9DFEC);clip-path:polygon(0 0,100% 0,94% 0,94% 25%,93% 25%,93% 50%,92% 50%,92% 25%,91% 25%,91% 0,83% 0,83% 42%,82% 42%,82% 85%,81% 85%,81% 42%,80% 42%,80% 0,71% 0,71% 30%,70% 30%,70% 60%,69% 60%,69% 30%,68% 30%,68% 0,60% 0,60% 48%,59% 48%,59% 95%,58% 95%,58% 48%,57% 48%,57% 0,49% 0,49% 20%,48% 20%,48% 40%,47% 40%,47% 20%,46% 20%,46% 0,36% 0,36% 40%,35% 40%,35% 80%,34% 80%,34% 40%,33% 40%,33% 0,25% 0,25% 28%,24% 28%,24% 55%,23% 55%,23% 28%,22% 28%,22% 0,16% 0,16% 50%,15% 50%,15% 100%,14% 100%,14% 50%,13% 50%,13% 0,7% 0,7% 22%,6% 22%,6% 45%,5% 45%,5% 22%,4% 22%,4% 0)}
+.bubble .flake{flex:none;width:18px;height:18px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9' shape-rendering='crispEdges' fill='%234BA3BE'%3E%3Crect x='4' y='0' width='1' height='1'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='4' y='1' width='1' height='1'/%3E%3Crect x='7' y='1' width='1' height='1'/%3E%3Crect x='2' y='2' width='1' height='1'/%3E%3Crect x='4' y='2' width='1' height='1'/%3E%3Crect x='6' y='2' width='1' height='1'/%3E%3Crect x='3' y='3' width='1' height='1'/%3E%3Crect x='4' y='3' width='1' height='1'/%3E%3Crect x='5' y='3' width='1' height='1'/%3E%3Crect x='0' y='4' width='1' height='1'/%3E%3Crect x='1' y='4' width='1' height='1'/%3E%3Crect x='2' y='4' width='1' height='1'/%3E%3Crect x='3' y='4' width='1' height='1'/%3E%3Crect x='4' y='4' width='1' height='1'/%3E%3Crect x='5' y='4' width='1' height='1'/%3E%3Crect x='6' y='4' width='1' height='1'/%3E%3Crect x='7' y='4' width='1' height='1'/%3E%3Crect x='8' y='4' width='1' height='1'/%3E%3Crect x='3' y='5' width='1' height='1'/%3E%3Crect x='4' y='5' width='1' height='1'/%3E%3Crect x='5' y='5' width='1' height='1'/%3E%3Crect x='2' y='6' width='1' height='1'/%3E%3Crect x='4' y='6' width='1' height='1'/%3E%3Crect x='6' y='6' width='1' height='1'/%3E%3Crect x='1' y='7' width='1' height='1'/%3E%3Crect x='4' y='7' width='1' height='1'/%3E%3Crect x='7' y='7' width='1' height='1'/%3E%3Crect x='4' y='8' width='1' height='1'/%3E%3C/svg%3E") center/contain no-repeat;image-rendering:pixelated;animation:spin 6s steps(8) infinite}
+.bubble .t{min-width:0}
+.bubble .spark{position:absolute;width:4px;height:4px;background:#FFFFFF;pointer-events:none;opacity:0;
+  box-shadow:0 -4px 0 #FFE9A8,0 4px 0 #FFE9A8,-4px 0 0 #FFE9A8,4px 0 0 #FFE9A8}
+/* bought: warm golden glow + twinkles (she sees it glow, not what you bought) */
+.bubble.got{--f:#FFF4DC;animation:bob 3.4s ease-in-out infinite,glow 2.6s ease-in-out infinite}
+.bubble.got .flake{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9' shape-rendering='crispEdges' fill='%23E8A33D'%3E%3Crect x='4' y='0' width='1' height='1'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='4' y='1' width='1' height='1'/%3E%3Crect x='7' y='1' width='1' height='1'/%3E%3Crect x='2' y='2' width='1' height='1'/%3E%3Crect x='4' y='2' width='1' height='1'/%3E%3Crect x='6' y='2' width='1' height='1'/%3E%3Crect x='3' y='3' width='1' height='1'/%3E%3Crect x='4' y='3' width='1' height='1'/%3E%3Crect x='5' y='3' width='1' height='1'/%3E%3Crect x='0' y='4' width='1' height='1'/%3E%3Crect x='1' y='4' width='1' height='1'/%3E%3Crect x='2' y='4' width='1' height='1'/%3E%3Crect x='3' y='4' width='1' height='1'/%3E%3Crect x='4' y='4' width='1' height='1'/%3E%3Crect x='5' y='4' width='1' height='1'/%3E%3Crect x='6' y='4' width='1' height='1'/%3E%3Crect x='7' y='4' width='1' height='1'/%3E%3Crect x='8' y='4' width='1' height='1'/%3E%3Crect x='3' y='5' width='1' height='1'/%3E%3Crect x='4' y='5' width='1' height='1'/%3E%3Crect x='5' y='5' width='1' height='1'/%3E%3Crect x='2' y='6' width='1' height='1'/%3E%3Crect x='4' y='6' width='1' height='1'/%3E%3Crect x='6' y='6' width='1' height='1'/%3E%3Crect x='1' y='7' width='1' height='1'/%3E%3Crect x='4' y='7' width='1' height='1'/%3E%3Crect x='7' y='7' width='1' height='1'/%3E%3Crect x='4' y='8' width='1' height='1'/%3E%3C/svg%3E")}
+.bubble.got .spark{animation:twinkle 1.8s steps(3) infinite}
+.bubble.got .spark:nth-of-type(1){top:-6px;right:14%}
+.bubble.got .spark:nth-of-type(2){bottom:2px;left:-10px;animation-delay:.6s}
+.bubble.got .spark:nth-of-type(3){top:40%;right:-12px;animation-delay:1.2s}
+.bubble:nth-child(5n+1):not(.got){--f:#FFE1EE}.bubble:nth-child(5n+2):not(.got){--f:var(--lav)}.bubble:nth-child(5n+3):not(.got){--f:var(--mint)}
+.bubble:nth-child(5n+4):not(.got){--f:var(--sky)}.bubble:nth-child(5n):not(.got){--f:var(--butter)}
 .bubble:hover,.bubble:active,.bubble.hold{animation-play-state:paused}
 .bubble.pop{animation:pop .32s steps(4) forwards}
 .bubble.new{animation:appear .35s steps(4),bob 3.4s ease-in-out .35s infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 3px rgba(255,205,110,.65))}50%{filter:drop-shadow(0 0 11px rgba(255,190,90,.95)) drop-shadow(0 0 3px #FFFFFF)}}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
+@keyframes spin{to{transform:rotate(90deg)}}
 .empty{align-self:center;padding:16px 18px;max-width:340px;text-align:center}
 
 .fabs{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));
@@ -57,29 +79,29 @@ canvas#world{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixel
 #fab:active,#send:active{transform:translateY(3px)}
 #send:disabled{opacity:.5;cursor:not-allowed;transform:none}
 #send:focus-visible{outline:3px dashed var(--ink);outline-offset:6px}
-.plaque .sent{font-family:var(--body);font-size:14px;background:var(--mint);padding:3px 8px}
+.plaque .sent{font-family:var(--body);font-size:18px;background:var(--mint);padding:3px 8px}
 
 /* composer */
 .overlay{position:fixed;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(46,85,102,.35);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .sheet-card{width:100%;max-width:420px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .sheet-card h2{font-family:var(--title);font-size:13px;margin:0;font-weight:400}
-#txt,#note{font-family:var(--body);font-size:20px;color:var(--ink);background:#FFFFFF;border:0;padding:12px;min-height:84px;resize:vertical;outline:none;
+#txt,#note{font-family:var(--body);font-size:24px;color:var(--ink);background:#FFFFFF;border:0;padding:12px;min-height:84px;resize:vertical;outline:none;
   box-shadow:inset 0 0 0 3px var(--lav)}
 #txt:focus,#note:focus{box-shadow:inset 0 0 0 3px var(--pink)}
-.sum{margin:0;font-size:18px}
-.msg{margin:0;font-size:16px;color:#C2416F;min-height:1em}
+.sum{margin:0;font-size:22px}
+.msg{margin:0;font-size:20px;color:#C2416F;min-height:1em}
 .sent-art{font-size:44px;text-align:center;line-height:1}
 .row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes pop{50%{transform:scale(1.15)}100%{transform:scale(0);opacity:0}}
 @keyframes appear{from{transform:scale(0)}to{transform:scale(1)}}
-@media (prefers-reduced-motion:reduce){.bubble,.heart{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.bubble,.heart,.bubble .flake,.bubble .spark{animation:none!important}.bubble.got{filter:drop-shadow(0 0 8px rgba(255,195,100,.9))}.bubble.got .spark{opacity:1}}
 
 /* ---- auth gate: nothing of her page shows until the account is verified ---- */
 html:not([data-auth="ok"]) .gate{visibility:hidden}
-#bye{position:fixed;left:calc(16px + env(safe-area-inset-left,0px));top:calc(16px + env(safe-area-inset-top,0px));z-index:2;
+#bye{position:fixed;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:2;
   font-family:var(--title);font-size:9px;cursor:pointer;border:0;color:var(--ink);padding:9px 10px;--f:var(--paper);background:var(--f)}
 #bye:focus-visible{outline:3px dashed var(--ink);outline-offset:6px}
 
@@ -87,8 +109,8 @@ html:not([data-auth="ok"]) .gate{visibility:hidden}
 #loginLayer{align-items:center;justify-content:center}
 .login-card{max-width:400px;width:100%;padding:26px 22px;display:flex;flex-direction:column;gap:14px}
 .login-card h1{font-family:var(--title);font-size:clamp(13px,4vw,16px);line-height:1.7;margin:0;font-weight:400;text-align:center}
-.login-card label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:17px}
-.login-card input{font-family:var(--body);font-size:19px;color:var(--ink);background:#FFFFFF;border:0;padding:10px 12px;outline:none;box-shadow:inset 0 0 0 3px var(--lav)}
+.login-card label{display:flex;flex-direction:column;gap:6px;font-size:22px}
+.login-card input{font-family:var(--body);font-size:24px;color:var(--ink);background:#FFFFFF;border:0;padding:10px 12px;outline:none;box-shadow:inset 0 0 0 3px var(--lav)}
 .login-card input:focus{box-shadow:inset 0 0 0 3px var(--pink)}
 .login-card .btn{align-self:stretch}
 .login-card .heart{align-self:center}
