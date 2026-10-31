@@ -1,10 +1,10 @@
 // Login: username + password → Firebase Auth → route by UID.
-import { auth, roleOf, pageFor } from "./firebase.js?v=20261031f";
+import { auth, roleOf, pageFor } from "./firebase.js?v=20261031g";
 import {
   signInWithEmailAndPassword, setPersistence, signOut,
   browserSessionPersistence, indexedDBLocalPersistence, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { LOGIN_DOMAIN } from "./config.js?v=20261031f";
+import { LOGIN_DOMAIN } from "./config.js?v=20261031g";
 
 const form = document.getElementById("loginForm"), userEl = document.getElementById("user"), passEl = document.getElementById("pass"),
   msg = document.getElementById("loginMsg"), go = document.getElementById("loginGo");

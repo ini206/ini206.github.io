@@ -1,16 +1,53 @@
 // Her shopping page: wish bubbles, undo, smarter send, live "bought" glow. Runs only after auth confirms her account.
-import { db, requireRole, logout } from "./firebase.js?v=20261031f";
-import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { TO_NAME } from "./config.js?v=20261031f";
+import { db, requireRole, logout } from "./firebase.js?v=20261031g";
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { TO_NAME } from "./config.js?v=20261031g";
 
 const user = await requireRole("her");
 document.documentElement.dataset.auth = "ok";
 const $ = id => document.getElementById(id);
-$("bye").addEventListener("click", () => logout(""));
+// Bye asks first, so a stray tap doesn't log her out.
+$("bye").addEventListener("click", () => { $("byeSheet").hidden = false; setTimeout(() => $("byeStay").focus(), 30); });
+$("byeStay").addEventListener("click", () => { $("byeSheet").hidden = true; });
+$("byeGo").addEventListener("click", () => logout(""));
+$("byeSheet").addEventListener("click", e => { if (e.target === $("byeSheet")) $("byeSheet").hidden = true; });
 
 // Firestore rules re-check every field server-side; this is just the honest client.
-const sendWishlist = (items, note) =>
-  addDoc(collection(db, "wishlists"), { items, note, by: user.uid, sentAt: serverTimestamp() });
+const sendWishlist = (items, images, note) =>
+  addDoc(collection(db, "wishlists"), { items, images, note, by: user.uid, sentAt: serverTimestamp() });
+
+/* ---------- photos: compressed on her phone, stored as their own Firestore doc ---------- */
+const MAX_DATA = 700000; // ~500 KB image; the rules allow up to 750k characters
+async function compressPhoto(file) {
+  if (!file || !/^image\//.test(file.type)) throw { code: "not-image" };
+  const url = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej({ code: "read-failed" }); r.readAsDataURL(file); });
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej({ code: "bad-image" }); i.src = url; });
+  let max = 1100, q = .82;
+  for (let k = 0; k < 7; k++) {
+    const sc = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const cv = document.createElement("canvas"); cv.width = Math.max(1, Math.round(img.naturalWidth * sc)); cv.height = Math.max(1, Math.round(img.naturalHeight * sc));
+    const g = cv.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height);
+    const out = cv.toDataURL("image/jpeg", q);
+    if (out.length <= MAX_DATA) return out;
+    max *= .8; q = Math.max(.5, q - .08);
+  }
+  throw { code: "too-big" };
+}
+const newImgId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join("");
+const imgCache = new Map();
+async function loadPhoto(id) {
+  if (imgCache.has(id)) return imgCache.get(id);
+  const snap = await getDoc(doc(db, "images", id));
+  const data = snap.exists() ? snap.data().data : null;
+  if (typeof data === "string" && /^data:image\/(jpeg|webp);base64,/.test(data)) { imgCache.set(id, data); return data; }
+  return null;
+}
+async function uploadPhoto(data) {
+  const id = newImgId();
+  await setDoc(doc(db, "images", id), { data, by: user.uid, createdAt: serverTimestamp() });
+  imgCache.set(id, data); return id;
+}
+const dropPhoto = id => { if (id) deleteDoc(doc(db, "images", id)).catch(() => {}); imgCache.delete(id); };
 
 /* ---------- time of day (scene lives in world.js) ---------- */
 const icons = h => h < 5 || h >= 20.4 ? "☾" : h < 6.5 ? "🌅" : h < 17.5 ? "☀" : h < 19.2 ? "🌇" : "☾";
@@ -66,6 +103,7 @@ function render() {
     const fl = Object.assign(document.createElement("span"), { className: "flake" }); fl.setAttribute("aria-hidden", "true");
     const tx = Object.assign(document.createElement("span"), { className: "t", textContent: it.text });
     b.append(cw, fl, tx);
+    if (it.img) { const pc = Object.assign(document.createElement("span"), { className: "pic", textContent: "📷", title: "Has a photo" }); b.append(pc); }
     if (it.sent) { const m = Object.assign(document.createElement("span"), { className: "sentmark", textContent: "✓", title: "Already sent" }); b.append(m); }
     for (let k = 0; k < 3; k++) { const sp = document.createElement("span"); sp.className = "spark"; sp.setAttribute("aria-hidden", "true"); b.append(sp); }
     b.style.animationDelay = it.id === justAdded ? "" : (-(it.id % 7) * .45) + "s";
@@ -103,18 +141,43 @@ $("undo").addEventListener("click", () => {
 });
 
 /* ---------- add / edit ---------- */
-function openSheet(id) { editing = id; const it = items.find(i => i.id === id); title.textContent = it ? "EDIT WISH ✎" : "NEW WISH ✿";
-  txt.value = it ? it.text : ""; sheet.hidden = false; setTimeout(() => txt.focus(), 30); }
-function closeSheet() { sheet.hidden = true; editing = null; }
+// pending photo while the sheet is open: {data} = newly chosen, {removed:true} = taken off, null = unchanged
+let pendingPhoto = null;
+function showPreview(src) { $("photoImg").src = src || ""; $("photoPrev").hidden = !src; $("photoAdd").textContent = src ? "🔄 Change photo" : "＋ 📷 Add photo"; }
+function openSheet(id) {
+  editing = id; pendingPhoto = null; $("sheetMsg").textContent = ""; $("photoIn").value = "";
+  const it = items.find(i => i.id === id); title.textContent = it ? "EDIT WISH ✎" : "NEW WISH ✿";
+  txt.value = it ? it.text : ""; showPreview(null); sheet.hidden = false; setTimeout(() => txt.focus(), 30);
+  if (it && it.img) { $("photoAdd").textContent = "Loading photo…"; loadPhoto(it.img).then(src => { if (editing === id && !pendingPhoto) showPreview(src); }).catch(() => showPreview(null)); }
+}
+function closeSheet() { sheet.hidden = true; editing = null; pendingPhoto = null; }
+$("photoAdd").addEventListener("click", () => $("photoIn").click());
+$("photoIn").addEventListener("change", async () => {
+  const f = $("photoIn").files[0]; if (!f) return;
+  $("photoAdd").disabled = true; $("sheetMsg").textContent = "";
+  try { const data = await compressPhoto(f); pendingPhoto = { data }; showPreview(data); }
+  catch (e) { $("sheetMsg").textContent = e.code === "not-image" ? "That file isn't a photo. Pick a JPG or PNG." : e.code === "too-big" ? "That photo is too large even after shrinking. Try a screenshot or crop." : "Couldn't open that photo. Try another one."; }
+  finally { $("photoAdd").disabled = false; $("photoIn").value = ""; }
+});
+$("photoDel").addEventListener("click", () => { pendingPhoto = { removed: true }; showPreview(null); });
 fab.onclick = () => openSheet(null);
 $("cancel").onclick = closeSheet;
 sheet.addEventListener("click", e => { if (e.target === sheet) closeSheet(); });
 txt.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
-form.addEventListener("submit", e => {
-  e.preventDefault(); const v = txt.value.trim();
+let saving = false;
+form.addEventListener("submit", async e => {
+  e.preventDefault(); if (saving) return; const v = txt.value.trim();
   if (!v) { txt.placeholder = "Type something first ✿"; txt.focus(); return; }
-  if (editing != null) { const it = items.find(i => i.id === editing); if (it && it.text !== v) { it.text = v; it.sent = false; } } // edited = needs re-sending
-  else { const id = Date.now(); items.push({ id, text: v, sent: false }); justAdded = id; }
+  const it = editing != null ? items.find(i => i.id === editing) : null;
+  let imgId = it ? it.img || null : null, changed = false;
+  if (pendingPhoto && pendingPhoto.data) {
+    saving = true; $("saveBtn").disabled = true; $("saveBtn").textContent = "Saving photo…"; $("sheetMsg").textContent = "";
+    try { const nid = await uploadPhoto(pendingPhoto.data); if (imgId) dropPhoto(imgId); imgId = nid; changed = true; }
+    catch (err) { $("sheetMsg").textContent = "The photo didn't upload (" + (err && err.code || "network error") + "). Check your internet and tap Save again."; return; }
+    finally { saving = false; $("saveBtn").disabled = false; $("saveBtn").textContent = "Save"; }
+  } else if (pendingPhoto && pendingPhoto.removed && imgId) { dropPhoto(imgId); imgId = null; changed = true; }
+  if (it) { if (it.text !== v || changed) { it.text = v; it.img = imgId; it.sent = false; } } // edited = needs re-sending
+  else { const id = Date.now(); items.push({ id, text: v, img: imgId, sent: false }); justAdded = id; }
   save(); closeSheet(); render();
 });
 
@@ -136,13 +199,13 @@ sendForm.addEventListener("submit", async e => {
   const fresh = items.filter(i => !i.sent); if (!fresh.length) return;
   sendGo.disabled = true; sendGo.textContent = "Sending…"; sendMsg.textContent = "";
   try {
-    await sendWishlist(fresh.map(i => i.text.slice(0, 160)), note.value.trim().slice(0, 300));
+    await sendWishlist(fresh.map(i => i.text.slice(0, 160)), fresh.map(i => i.img || ""), note.value.trim().slice(0, 300));
     fresh.forEach(i => i.sent = true); save();
     note.value = ""; sendForm.hidden = true; sentCard.hidden = false; render();
   } catch (err) { sendMsg.textContent = "That didn't go through (" + (err && err.code || "network error") + "). Try again in a moment."; }
   finally { sendGo.disabled = false; sendGo.textContent = "Send ✉"; }
 });
-addEventListener("keydown", e => { if (e.key !== "Escape") return; if (!sheet.hidden) closeSheet(); else if (!sendSheet.hidden) closeSend(); else toggleMenu(false); });
+addEventListener("keydown", e => { if (e.key !== "Escape") return; if (!$("byeSheet").hidden) $("byeSheet").hidden = true; else if (!sheet.hidden) closeSheet(); else if (!sendSheet.hidden) closeSend(); else toggleMenu(false); });
 
 /* ---------- glow sync: items he marked bought ---------- */
 // Rules only let her read lists she sent, so the query must filter on "by".

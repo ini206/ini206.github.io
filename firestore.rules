@@ -9,7 +9,7 @@ service cloud.firestore {
     match /wishlists/{listId} {
       // Only her account can send, and only a list in the exact expected shape.
       allow create: if isHer()
-        && request.resource.data.keys().hasOnly(['items', 'note', 'by', 'sentAt'])
+        && request.resource.data.keys().hasOnly(['items', 'images', 'note', 'by', 'sentAt'])
         && request.resource.data.keys().hasAll(['items', 'note', 'by', 'sentAt'])
         && request.resource.data.by == request.auth.uid
         && request.resource.data.sentAt == request.time
@@ -17,7 +17,9 @@ service cloud.firestore {
         && request.resource.data.items.size() >= 1
         && request.resource.data.items.size() <= 50
         && request.resource.data.note is string
-        && request.resource.data.note.size() <= 300;
+        && request.resource.data.note.size() <= 300
+        && (!('images' in request.resource.data)
+            || (request.resource.data.images is list && request.resource.data.images.size() <= 50));
 
       // You read and delete everything; she can read only the lists she sent (to see what glows).
       allow read: if isAdmin() || (isHer() && resource.data.by == request.auth.uid);
@@ -28,6 +30,21 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bought'])
         && request.resource.data.bought is list
         && request.resource.data.bought.size() <= 50;
+    }
+
+    // Photos: only she uploads (JPEG/WebP data, size-capped), nothing can be edited,
+    // only you and she can open one by its id, and nobody can list them.
+    match /images/{imgId} {
+      allow create: if isHer()
+        && request.resource.data.keys().hasOnly(['data', 'by', 'createdAt'])
+        && request.resource.data.keys().hasAll(['data', 'by', 'createdAt'])
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.data is string
+        && request.resource.data.data.size() <= 750000
+        && request.resource.data.data.matches('data:image/(jpeg|webp);base64,[A-Za-z0-9+/=]+');
+      allow get: if isAdmin() || (isHer() && resource.data.by == request.auth.uid);
+      allow delete: if isAdmin() || (isHer() && resource.data.by == request.auth.uid);
     }
 
     // Everything else: closed.

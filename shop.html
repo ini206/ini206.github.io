@@ -9,9 +9,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
 
 <title>Lakeside Wishlist</title>
-<link rel="stylesheet" href="css/lake.css?v=20261031f">
-<script src="js/world.js?v=20261031f" defer></script>
-<script type="module" src="js/shop.js?v=20261031f"></script>
+<link rel="stylesheet" href="css/lake.css?v=20261031g">
+<script src="js/world.js?v=20261031g" defer></script>
+<script type="module" src="js/shop.js?v=20261031g"></script>
 </head>
 <body>
 <canvas id="world" aria-hidden="true"></canvas>
@@ -48,9 +48,18 @@
   <form class="sheet-card px" id="form">
     <h2 id="sheetTitle">NEW WISH ✿</h2>
     <textarea id="txt" maxlength="160" placeholder="e.g. pink lip oil, soft blush, a cute mirror…"></textarea>
+    <div class="photo-row">
+      <input type="file" id="photoIn" accept="image/*" hidden>
+      <button type="button" class="photo-add px" id="photoAdd"><span aria-hidden="true">＋</span> 📷 Add photo</button>
+      <div class="photo-prev" id="photoPrev" hidden>
+        <img id="photoImg" alt="Photo for this wish">
+        <button type="button" id="photoDel" class="px" aria-label="Remove photo">✕</button>
+      </div>
+    </div>
+    <p class="msg" id="sheetMsg" role="alert"></p>
     <div class="row">
       <button class="btn alt px" type="button" id="cancel">Cancel</button>
-      <button class="btn px" type="submit">Save</button>
+      <button class="btn px" type="submit" id="saveBtn">Save</button>
     </div>
   </form>
 </div>
@@ -72,6 +81,16 @@
     <h2>SENT! ✿</h2>
     <p class="sum">Your new wishes flew to your Bohui. Now give him a hug!!!</p>
     <div class="row"><button class="btn px" type="button" id="sentClose">Yay</button></div>
+  </div>
+</div>
+<div id="byeSheet" class="overlay" hidden>
+  <div class="sheet-card px" role="dialog" aria-labelledby="byeTitle">
+    <h2 id="byeTitle">LEAVING THE LAKE? ⏻</h2>
+    <p class="sum">You'll need your username and password to come back in.</p>
+    <div class="row">
+      <button class="btn alt px" type="button" id="byeStay">Stay ✿</button>
+      <button class="btn px" type="button" id="byeGo">Log out</button>
+    </div>
   </div>
 </div>
 <div id="toast" class="px" role="status" hidden><span id="toastText"></span><button id="undo" class="px" type="button">UNDO</button></div>

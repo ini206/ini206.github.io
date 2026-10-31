@@ -1,9 +1,19 @@
 // Admin inbox: live lists from Firestore. Only loads after auth confirms the admin UID.
-import { db, requireRole, logout, startIdleTimer } from "./firebase.js?v=20261031f";
-import { collection, query, orderBy, onSnapshot, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { db, requireRole, logout, startIdleTimer } from "./firebase.js?v=20261031g";
+import { collection, query, orderBy, onSnapshot, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
 const SEEN_KEY = "wishlist-admin-seen";
+// Photos load only when you tap 👁, and stay open across live refreshes.
+const openPics = new Set(), picCache = new Map();
+const validImgId = id => typeof id === "string" && /^[0-9a-f]{32}$/.test(id);
+async function loadPic(id) {
+  if (picCache.has(id)) return picCache.get(id);
+  const snap = await getDoc(doc(db, "images", id));
+  const data = snap.exists() ? snap.data().data : null;
+  const ok = typeof data === "string" && /^data:image\/(jpeg|webp);base64,/.test(data) ? data : null; // only real JPEG/WebP data URLs
+  picCache.set(id, ok); return ok;
+}
 let seenAt = 0, pendingDelete = null;
 try { seenAt = +localStorage.getItem(SEEN_KEY) || 0; } catch (e) {}
 
@@ -48,7 +58,30 @@ function render(docs) {
         catch (err) { cb.checked = !cb.checked; $("inboxMsg").textContent = friendly(err.code); }
       });
       lab.append(cb, Object.assign(document.createElement("span"), { textContent: String(text) }));
-      li.append(lab); ul.append(li);
+      li.append(lab);
+      const imgId = (x.images || [])[i];
+      if (validImgId(imgId)) {
+        const key = d.id + ":" + i;
+        const eye = document.createElement("button"); eye.type = "button"; eye.className = "eye px";
+        const fig = document.createElement("figure"); fig.className = "pic"; fig.hidden = true;
+        const show = async open => {
+          if (open) openPics.add(key); else openPics.delete(key);
+          eye.textContent = open ? "🙈 Hide" : "👁 Photo"; eye.setAttribute("aria-expanded", String(open));
+          fig.hidden = !open; if (!open) return;
+          if (!fig.firstChild) {
+            fig.textContent = "Loading photo…";
+            try {
+              const src = await loadPic(imgId);
+              fig.replaceChildren();
+              if (src) { const im = document.createElement("img"); im.alt = "Photo for: " + String(text); im.src = src; fig.append(im); }
+              else fig.textContent = "This photo is no longer available.";
+            } catch (err) { fig.textContent = "Couldn't load the photo (" + (err.code || "error") + ")."; }
+          }
+        };
+        eye.addEventListener("click", () => show(fig.hidden));
+        li.append(eye, fig); show(openPics.has(key));
+      }
+      ul.append(li);
     });
     card.append(ul);
     const act = document.createElement("div"); act.className = "actions";
@@ -57,7 +90,7 @@ function render(docs) {
     del.onclick = async () => {
       if (pendingDelete !== d.id) { pendingDelete = d.id; del.textContent = "Tap again to delete"; setTimeout(() => { if (pendingDelete === d.id) { pendingDelete = null; del.textContent = "Delete list"; } }, 4000); return; }
       pendingDelete = null; del.disabled = true;
-      try { await deleteDoc(doc(db, "wishlists", d.id)); } catch (err) { del.disabled = false; $("inboxMsg").textContent = friendly(err.code); }
+      try { await deleteDoc(doc(db, "wishlists", d.id)); (x.images || []).filter(validImgId).forEach(id => deleteDoc(doc(db, "images", id)).catch(() => {})); } catch (err) { del.disabled = false; $("inboxMsg").textContent = friendly(err.code); }
     };
     const allGot = items.length > 0 && bought.size === items.length;
     const gotBtn = document.createElement("button"); gotBtn.type = "button"; gotBtn.className = "btn got px" + (allGot ? " on" : "");

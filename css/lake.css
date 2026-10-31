@@ -143,3 +143,13 @@ html:not([data-auth="ok"]) .gate{visibility:hidden}
 #timeMenu button{font-family:var(--body);font-size:21px;border:0;cursor:pointer;color:var(--ink);padding:4px 10px;text-align:left;background:transparent}
 #timeMenu button:hover,#timeMenu button.on{background:var(--lav)}
 [data-night="1"] .hint{background:rgba(255,247,251,.9)}
+
+/* ---- photo on a wish ---- */
+.photo-row{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.photo-add{font-family:var(--body);font-size:21px;border:0;cursor:pointer;color:var(--ink);padding:6px 12px;--f:var(--lav);background:var(--f)}
+.photo-add:hover{--f:#B3EAF3}
+.photo-add:disabled{opacity:.6;cursor:wait}
+.photo-prev{position:relative;max-width:100%}
+.photo-prev img{display:block;max-width:100%;max-height:180px;object-fit:contain;background:#FFFFFF;box-shadow:0 0 0 3px var(--ink);image-rendering:auto}
+#photoDel{position:absolute;top:-10px;right:-10px;width:30px;height:30px;border:0;cursor:pointer;font-size:16px;color:var(--ink);--f:var(--pink);background:var(--f);margin:0}
+.bubble .pic{flex:none;font-size:18px;line-height:1}
