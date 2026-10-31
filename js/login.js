@@ -51,7 +51,9 @@ form.addEventListener("submit", async e => {
     fails++;
     if (fails >= 5) { lockedUntil = Date.now() + 30000 * (fails - 4); }
     // Same message for wrong user and wrong password: don't confirm which usernames exist.
-    msg.textContent = err.code === "auth/network-request-failed" ? "No connection. Check your internet."
+    // "not-allowed" only happens after a correct password, so naming it leaks nothing.
+    msg.textContent = err.code === "not-allowed" ? "Signed in, but this account isn't set up for this site yet (check the UID in config.js)."
+      : err.code === "auth/network-request-failed" ? "No connection. Check your internet."
       : err.code === "auth/too-many-requests" ? "Too many tries. Wait a few minutes."
       : "That username or password isn't right.";
     passEl.value = ""; passEl.focus();
