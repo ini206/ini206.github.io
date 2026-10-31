@@ -3,21 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
 
 <title>Lakeside Wishlist</title>
-<link rel="stylesheet" href="css/lake.css?v=20261031h">
-<script src="js/world.js?v=20261031h" defer></script>
-<script type="module" src="js/shop.js?v=20261031h"></script>
+<link rel="stylesheet" href="css/lake.css?v=20261031i">
+<script src="js/world.js?v=20261031i" defer></script>
+<script type="module" src="js/shop.js?v=20261031i"></script>
 </head>
 <body>
 <canvas id="world" aria-hidden="true"></canvas>
 <div id="corner" class="gate">
   <button id="timeBtn" class="cbtn px" type="button" aria-label="Change time of day" aria-expanded="false"><span id="timeIcon">☀</span></button>
   <button id="bye" class="px" type="button">⏻ BYE</button>
+  <button id="musicBtn" class="cbtn px" type="button" aria-label="Mute music" aria-pressed="false">♪</button>
   <div id="timeMenu" class="px" hidden>
     <button type="button" data-jump="6">Dawn</button><button type="button" data-jump="12">Day</button>
     <button type="button" data-jump="18">Sunset</button><button type="button" data-jump="22.5">Night</button>
@@ -94,5 +95,6 @@
   </div>
 </div>
 <div id="toast" class="px" role="status" hidden><span id="toastText"></span><button id="undo" class="px" type="button">UNDO</button></div>
+<audio id="bgm" src="zephiramusic-lofi-winter-610024.mp3" loop preload="none"></audio>
 </body>
 </html>

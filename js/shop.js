@@ -1,7 +1,7 @@
 // Her shopping page: wish bubbles, undo, smarter send, live "bought" glow. Runs only after auth confirms her account.
-import { db, requireRole, logout } from "./firebase.js?v=20261031h";
+import { db, requireRole, logout } from "./firebase.js?v=20261031i";
 import { collection, addDoc, serverTimestamp, query, where, onSnapshot, doc, setDoc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { TO_NAME } from "./config.js?v=20261031h";
+import { TO_NAME } from "./config.js?v=20261031i";
 
 const user = await requireRole("her");
 document.documentElement.dataset.auth = "ok";
@@ -83,7 +83,7 @@ const intro = $("intro"), main = $("main"), fabs = $("fabs"), fab = $("fab"), se
   sheet = $("sheet"), form = $("form"), txt = $("txt"), title = $("sheetTitle"), toast = $("toast");
 let editing = null, justAdded = null, tapTimer = null, tapId = null, started = false;
 
-function begin() { if (started) return; started = true; intro.hidden = true; main.hidden = false; fabs.hidden = false; render(); }
+function begin() { if (started) return; started = true; intro.hidden = true; main.hidden = false; fabs.hidden = false; render(); startMusic(); }
 $("start").addEventListener("pointerdown", e => { if (e.button === 0 || e.pointerType !== "mouse") begin(); });
 $("start").addEventListener("click", begin);
 addEventListener("keydown", e => { if (!started && (e.key === "Enter" || e.key === " ")) begin(); });
@@ -252,3 +252,42 @@ async function purgeWish(item) {
     await updateDoc(ref, upd);
   }
 }
+
+/* ---------- music: begins silent on her Start tap and fades up softly; mute is remembered ---------- */
+const MKEY = "lakeside-music-muted", TARGET = .35, FADE_MS = 7000;
+const bgm = $("bgm");
+let muted = false; try { muted = localStorage.getItem(MKEY) === "1"; } catch (e) {}
+let ac = null, gain = null, fadeRaf = 0;
+function setMusicUI() {
+  const b = $("musicBtn");
+  b.textContent = muted ? "🔇" : "♪"; b.setAttribute("aria-pressed", String(muted));
+  b.setAttribute("aria-label", muted ? "Turn music on" : "Mute music"); b.title = muted ? "Music off" : "Music on";
+}
+// iPhones ignore audio.volume, so the fade runs through a Web Audio gain node when available.
+function level(v) { if (gain) gain.gain.value = v; else bgm.volume = Math.max(0, Math.min(1, v)); }
+function current() { return gain ? gain.gain.value : bgm.volume; }
+function fadeTo(to, ms, done) {
+  cancelAnimationFrame(fadeRaf); const from = current(), t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0) / ms); level(from + (to - from) * k * k * (3 - 2 * k)); if (k < 1) fadeRaf = requestAnimationFrame(step); else if (done) done(); };
+  fadeRaf = requestAnimationFrame(step);
+}
+function startMusic() {
+  if (muted) return;
+  try {
+    if (!ac) { const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) { ac = new AC(); gain = ac.createGain(); gain.gain.value = 0; ac.createMediaElementSource(bgm).connect(gain).connect(ac.destination); } }
+    if (ac && ac.state === "suspended") ac.resume();
+  } catch (e) { gain = null; }
+  level(0);
+  bgm.play().then(() => fadeTo(TARGET, FADE_MS)).catch(() => { /* blocked by the browser: the ♪ button starts it */ });
+}
+function stopMusic() { fadeTo(0, 600, () => bgm.pause()); }
+$("musicBtn").addEventListener("click", () => {
+  muted = !muted; try { localStorage.setItem(MKEY, muted ? "1" : "0"); } catch (e) {}
+  setMusicUI(); if (muted) stopMusic(); else startMusic();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { if (!bgm.paused) { cancelAnimationFrame(fadeRaf); bgm.pause(); } }
+  else if (started && !muted) startMusic();
+});
+setMusicUI();
