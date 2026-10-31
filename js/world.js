@@ -146,9 +146,14 @@ addEventListener("resize",()=>{clearTimeout(window._r);window._r=setTimeout(resi
 const vnHour=()=>{const p=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Ho_Chi_Minh",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date());
   const g=k=>+p.find(x=>x.type===k).value;return (g("hour")%24)+g("minute")/60};
 const phaseName=h=>h<5||h>=20.4?"Night":h<6.5?"Dawn":h<9.5?"Morning":h<15.5?"Day":h<17.5?"Afternoon":h<19.2?"Sunset":"Dusk";
-let followClock=true;
-setHour(vnHour());resize();
+// Her pick (Dawn/Day/Sunset/Night or Auto) is remembered on this device.
+const TKEY="lakeside-time";
+let saved=null;try{saved=localStorage.getItem(TKEY)}catch(e){}
+const savedHour=saved!==null&&saved!=="auto"&&isFinite(+saved)?Math.min(23.99,Math.max(0,+saved)):null;
+let followClock=savedHour===null;
+setHour(followClock?vnHour():savedHour);resize();
 setInterval(()=>{if(followClock)setHour(vnHour())},60000);
 if(!still&&!looping){looping=true;requestAnimationFrame(loop)}
-window.Lake={pick:h=>{followClock=false;setHour(h)},auto:()=>{followClock=true;setHour(vnHour())},
+const remember=v=>{try{localStorage.setItem(TKEY,v)}catch(e){}};
+window.Lake={pick:h=>{followClock=false;setHour(h);remember(String(h))},auto:()=>{followClock=true;setHour(vnHour());remember("auto")},
   phaseName,get hour(){return HOUR},get follow(){return followClock}};

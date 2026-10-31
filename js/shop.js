@@ -1,7 +1,7 @@
 // Her shopping page: wish bubbles, undo, smarter send, live "bought" glow. Runs only after auth confirms her account.
-import { db, requireRole, logout } from "./firebase.js?v=20261031e";
+import { db, requireRole, logout } from "./firebase.js?v=20261031f";
 import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { TO_NAME } from "./config.js?v=20261031e";
+import { TO_NAME } from "./config.js?v=20261031f";
 
 const user = await requireRole("her");
 document.documentElement.dataset.auth = "ok";
