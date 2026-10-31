@@ -5,7 +5,7 @@ import {
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, ROLES, ADMIN_IDLE_MINUTES } from "./config.js";
+import { firebaseConfig, ROLES, ADMIN_IDLE_MINUTES } from "./config.js?v=20261031b";
 
 export const app = initializeApp(firebaseConfig);
 // initializeAuth without a popup/redirect resolver: no hidden auth iframe gets loaded.

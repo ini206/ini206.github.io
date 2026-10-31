@@ -1,5 +1,5 @@
 // Admin inbox: live lists from Firestore. Only loads after auth confirms the admin UID.
-import { db, requireRole, logout, startIdleTimer } from "./firebase.js";
+import { db, requireRole, logout, startIdleTimer } from "./firebase.js?v=20261031b";
 import { collection, query, orderBy, onSnapshot, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);

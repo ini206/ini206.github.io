@@ -1,7 +1,7 @@
 // Her shopping page: wish bubbles + send. Runs only after auth confirms her account.
-import { db, requireRole, logout } from "./firebase.js";
+import { db, requireRole, logout } from "./firebase.js?v=20261031b";
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { TO_NAME } from "./config.js";
+import { TO_NAME } from "./config.js?v=20261031b";
 
 const user = await requireRole("her");
 document.documentElement.dataset.auth = "ok";
