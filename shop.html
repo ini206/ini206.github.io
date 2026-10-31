@@ -9,13 +9,21 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
 
 <title>Lakeside Wishlist</title>
-<link rel="stylesheet" href="css/lake.css?v=20261031d">
-<script src="js/world.js?v=20261031d" defer></script>
-<script type="module" src="js/shop.js?v=20261031d"></script>
+<link rel="stylesheet" href="css/lake.css?v=20261031e">
+<script src="js/world.js?v=20261031e" defer></script>
+<script type="module" src="js/shop.js?v=20261031e"></script>
 </head>
 <body>
 <canvas id="world" aria-hidden="true"></canvas>
-<button id="bye" class="px gate" type="button">⏻ BYE</button>
+<div id="corner" class="gate">
+  <button id="timeBtn" class="cbtn px" type="button" aria-label="Change time of day" aria-expanded="false"><span id="timeIcon">☀</span></button>
+  <button id="bye" class="px" type="button">⏻ BYE</button>
+  <div id="timeMenu" class="px" hidden>
+    <button type="button" data-jump="6">Dawn</button><button type="button" data-jump="12">Day</button>
+    <button type="button" data-jump="18">Sunset</button><button type="button" data-jump="22.5">Night</button>
+    <button type="button" id="autoTime">Auto ✓</button>
+  </div>
+</div>
 
 <section class="layer gate" id="intro">
   <div class="intro-card px">
@@ -28,11 +36,11 @@
 
 <section class="layer" id="main" hidden>
   <div class="plaque px">MY WISHLIST <span class="count" id="count">0</span><span class="sent" id="sentTag" hidden>sent ✓</span></div>
-  <div class="hint">tap to edit · double-tap to pop</div>
+  <div class="hint">tap to edit · double-tap to pop · dashed = not sent yet</div>
   <div class="board" id="board" aria-live="polite"></div>
 </section>
 <div class="fabs" id="fabs" hidden>
-  <button id="send" class="px" type="button" aria-label="Send my list"><span class="env">✉</span>SEND</button>
+  <button id="send" class="px" type="button" aria-label="Send my list"><span class="env">✉</span>SEND<span id="sendBadge" hidden>0</span></button>
   <button id="fab" class="px" type="button" aria-label="Add a wish">+</button>
 </div>
 
@@ -51,6 +59,7 @@
   <form class="sheet-card px" id="sendForm">
     <h2>SEND TO <span id="toName">ME</span>? ✉</h2>
     <p class="sum" id="sendSum"></p>
+    <ul class="send-list" id="sendList"></ul>
     <textarea id="note" maxlength="300" placeholder="a little note for me (optional)"></textarea>
     <p class="msg" id="sendMsg" role="alert"></p>
     <div class="row">
@@ -61,9 +70,10 @@
   <div class="sheet-card px" id="sentCard" hidden>
     <div class="sent-art">💌</div>
     <h2>SENT! ✿</h2>
-    <p class="sum">Your list flew over the lake. Now act surprised.</p>
+    <p class="sum">Your new wishes flew over the lake. Now act surprised.</p>
     <div class="row"><button class="btn px" type="button" id="sentClose">Yay</button></div>
   </div>
 </div>
+<div id="toast" class="px" role="status" hidden><span id="toastText"></span><button id="undo" class="px" type="button">UNDO</button></div>
 </body>
 </html>
