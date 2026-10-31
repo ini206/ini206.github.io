@@ -1,7 +1,7 @@
 // Her shopping page: wish bubbles, undo, smarter send, live "bought" glow. Runs only after auth confirms her account.
-import { db, requireRole, logout } from "./firebase.js?v=20261031g";
-import { collection, addDoc, serverTimestamp, query, where, onSnapshot, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { TO_NAME } from "./config.js?v=20261031g";
+import { db, requireRole, logout } from "./firebase.js?v=20261031h";
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot, doc, setDoc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { TO_NAME } from "./config.js?v=20261031h";
 
 const user = await requireRole("her");
 document.documentElement.dataset.auth = "ok";
@@ -124,19 +124,27 @@ function tap(id, el) {
 let undoTimer = null, lastPopped = null;
 function remove(id, el) {
   const idx = items.findIndex(i => i.id === id); if (idx < 0) return;
+  if (lastPopped) commitPop(); // a second pop finalizes the first one right away
   lastPopped = { item: items[idx], idx };
   el.classList.add("pop");
   setTimeout(() => { items = items.filter(i => i.id !== id); save(); render(); showToast(lastPopped.item.text); }, 320);
 }
+// Once Undo is no longer possible, the wish is deleted everywhere: her photo, and its copy in DK's inbox.
+function commitPop() {
+  const p = lastPopped; lastPopped = null; if (!p) return;
+  purgeWish(p.item).catch(() => { /* offline: his copy stays; nothing breaks */ });
+}
+addEventListener("pagehide", commitPop);
 function showToast(text) {
   $("toastText").textContent = "Popped “" + (text.length > 22 ? text.slice(0, 21) + "…" : text) + "”";
   toast.hidden = false; toast.classList.remove("out"); void toast.offsetWidth; toast.classList.add("in");
   clearTimeout(undoTimer); undoTimer = setTimeout(hideToast, 5000);
 }
-function hideToast() { toast.classList.add("out"); setTimeout(() => { toast.hidden = true; lastPopped = null; }, 250); }
+function hideToast() { commitPop(); toast.classList.add("out"); setTimeout(() => { toast.hidden = true; }, 250); }
 $("undo").addEventListener("click", () => {
   if (!lastPopped) return;
-  items.splice(Math.min(lastPopped.idx, items.length), 0, lastPopped.item); justAdded = lastPopped.item.id;
+  const p = lastPopped; lastPopped = null; // undone: nothing gets deleted
+  items.splice(Math.min(p.idx, items.length), 0, p.item); justAdded = p.item.id;
   save(); render(); clearTimeout(undoTimer); hideToast();
 });
 
@@ -176,7 +184,9 @@ form.addEventListener("submit", async e => {
     catch (err) { $("sheetMsg").textContent = "The photo didn't upload (" + (err && err.code || "network error") + "). Check your internet and tap Save again."; return; }
     finally { saving = false; $("saveBtn").disabled = false; $("saveBtn").textContent = "Save"; }
   } else if (pendingPhoto && pendingPhoto.removed && imgId) { dropPhoto(imgId); imgId = null; changed = true; }
-  if (it) { if (it.text !== v || changed) { it.text = v; it.img = imgId; it.sent = false; } } // edited = needs re-sending
+  if (it) { if (it.text !== v || changed) {
+    if (it.sent && it.text !== v) it.prev = [...new Set([...(it.prev || []), it.text])].slice(-10);
+    it.text = v; it.img = imgId; it.sent = false; } } // edited = needs re-sending
   else { const id = Date.now(); items.push({ id, text: v, img: imgId, sent: false }); justAdded = id; }
   save(); closeSheet(); render();
 });
@@ -209,10 +219,36 @@ addEventListener("keydown", e => { if (e.key !== "Escape") return; if (!$("byeSh
 
 /* ---------- glow sync: items he marked bought ---------- */
 // Rules only let her read lists she sent, so the query must filter on "by".
+let myLists = [];
 onSnapshot(query(collection(db, "wishlists"), where("by", "==", user.uid)), snap => {
-  const next = new Set();
-  snap.docs.forEach(d => { const x = d.data(), its = x.items || []; (x.bought || []).forEach(i => { if (its[i] != null) next.add(norm(its[i])); }); });
-  const changed = next.size !== boughtTexts.size || [...next].some(t => !boughtTexts.has(t));
+  myLists = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const next = new Set(), present = new Set();
+  myLists.forEach(x => { const its = x.items || []; its.forEach(t => present.add(norm(t))); (x.bought || []).forEach(i => { if (its[i] != null) next.add(norm(its[i])); }); });
+  let changed = next.size !== boughtTexts.size || [...next].some(t => !boughtTexts.has(t));
   boughtTexts = next;
+  // DK deleted it: a sent wish that's in none of her lists anymore disappears here too.
+  // Skipped for cache-only snapshots, which can be incomplete while offline.
+  if (!snap.metadata || !snap.metadata.fromCache) {
+    const before = items.length;
+    items = items.filter(i => !i.sent || present.has(norm(i.text)));
+    if (items.length !== before) { save(); changed = true; }
+  }
   if (changed && started && sheet.hidden) render();
-}, () => { /* offline or rules not updated yet: bubbles just don't glow */ });
+}, () => { /* offline or rules not updated yet: no glow, no sync */ });
+
+async function purgeWish(item) {
+  if (item.img) dropPhoto(item.img);
+  const texts = new Set([item.text, ...(item.prev || [])].map(norm));
+  for (const x of myLists) {
+    const its = x.items || [];
+    const keep = its.map((_, i) => i).filter(i => !texts.has(norm(its[i])));
+    if (keep.length === its.length) continue;
+    const ref = doc(db, "wishlists", x.id);
+    if (!keep.length) { await deleteDoc(ref); (x.images || []).forEach(id => id && dropPhoto(id)); continue; }
+    const at = new Map(keep.map((oldI, newI) => [oldI, newI]));
+    const upd = { items: keep.map(i => its[i]) };
+    if (Array.isArray(x.images)) { upd.images = keep.map(i => x.images[i] || ""); its.forEach((_, i) => { if (!at.has(i) && x.images[i]) dropPhoto(x.images[i]); }); }
+    if (Array.isArray(x.bought)) upd.bought = x.bought.filter(i => at.has(i)).map(i => at.get(i));
+    await updateDoc(ref, upd);
+  }
+}

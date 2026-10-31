@@ -23,13 +23,25 @@ service cloud.firestore {
 
       // You read and delete everything; she can read only the lists she sent (to see what glows).
       allow read: if isAdmin() || (isHer() && resource.data.by == request.auth.uid);
-      allow delete: if isAdmin();
+      // Deleting syncs both ways: you can delete any list, she can delete her own.
+      allow delete: if isAdmin() || (isHer() && resource.data.by == request.auth.uid);
 
       // You can only change the "bought" ticks — never her words.
-      allow update: if isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bought'])
-        && request.resource.data.bought is list
-        && request.resource.data.bought.size() <= 50;
+      // She can only REMOVE wishes from her own list: fewer items, all of them already there.
+      allow update: if (isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bought'])
+          && request.resource.data.bought is list
+          && request.resource.data.bought.size() <= 50)
+        || (isHer() && resource.data.by == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['items', 'images', 'bought'])
+          && request.resource.data.items is list
+          && request.resource.data.items.size() >= 1
+          && request.resource.data.items.size() < resource.data.items.size()
+          && resource.data.items.hasAll(request.resource.data.items)
+          && (!('images' in request.resource.data)
+              || (request.resource.data.images is list && request.resource.data.images.size() == request.resource.data.items.size()))
+          && (!('bought' in request.resource.data)
+              || (request.resource.data.bought is list && request.resource.data.bought.size() <= request.resource.data.items.size())));
     }
 
     // Photos: only she uploads (JPEG/WebP data, size-capped), nothing can be edited,

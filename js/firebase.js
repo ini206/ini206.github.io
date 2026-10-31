@@ -5,7 +5,7 @@ import {
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, ROLES, ADMIN_IDLE_MINUTES } from "./config.js?v=20261031g";
+import { firebaseConfig, ROLES, ADMIN_IDLE_MINUTES } from "./config.js?v=20261031h";
 
 export const app = initializeApp(firebaseConfig);
 // initializeAuth without a popup/redirect resolver: no hidden auth iframe gets loaded.
@@ -15,7 +15,7 @@ export const db = getFirestore(app);
 
 export const roleOf = user => !user ? null : user.uid === ROLES.admin ? "admin" : user.uid === ROLES.her ? "her" : "unknown";
 // Same tag as the ?v= on every file: redirects always land on a fresh page after a deploy.
-const V = "20261031g";
+const V = "20261031h";
 export const pageFor = role => (role === "admin" ? "admin.html" : role === "her" ? "shop.html" : "index.html") + "?v=" + V;
 
 export async function logout(reason) {
