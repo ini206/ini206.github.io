@@ -12,7 +12,7 @@ export const firebaseConfig = {
 // 2) Paste the two UIDs from Firebase Console → Authentication → Users.
 //    These only decide which page to show; the Firestore rules enforce the same UIDs server-side.
 export const ROLES = {
-  admin: "jf6iaizJkrUoar3Vzvv6nZaGRIA3",
+  admin: "ySsQTfM0FmP5GmwsyhusIKAY4t03",
   her: "XTR9TcajnTXxx4AM7lo5VwzCZWQ2"
 };
 
