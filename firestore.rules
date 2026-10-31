@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Paste the two UIDs from Firebase Console → Authentication → Users (same as js/config.js).
+    function isAdmin() { return request.auth != null && request.auth.uid == "Lrj6wScXtHVk6zmOsL9urGwqEUh2"; }
+    function isHer()   { return request.auth != null && request.auth.uid == "XTR9TcajnTXxx4AM7lo5VwzCZWQ2"; }
+
+    match /wishlists/{listId} {
+      // Only her account can send, and only a list in the exact expected shape.
+      allow create: if isHer()
+        && request.resource.data.keys().hasOnly(['items', 'note', 'by', 'sentAt'])
+        && request.resource.data.keys().hasAll(['items', 'note', 'by', 'sentAt'])
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.sentAt == request.time
+        && request.resource.data.items is list
+        && request.resource.data.items.size() >= 1
+        && request.resource.data.items.size() <= 50
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 300;
+
+      // Only you can read and delete lists.
+      allow read, delete: if isAdmin();
+
+      // You can only change the "bought" ticks — never her words.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bought'])
+        && request.resource.data.bought is list
+        && request.resource.data.bought.size() <= 50;
+    }
+
+    // Everything else: closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

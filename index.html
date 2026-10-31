@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600;700&display=swap">
+
+<title>Lakeside</title>
+<link rel="stylesheet" href="css/lake.css">
+<script src="js/world.js" defer></script>
+<script type="module" src="js/login.js"></script>
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas>
+<section class="layer" id="loginLayer">
+  <form class="login-card px" id="loginForm" novalidate>
+    <canvas class="heart" id="heart" width="10" height="9" aria-hidden="true"></canvas>
+    <h1>Who's there? ✿</h1>
+    <label for="user">Username<input id="user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="40" required></label>
+    <label for="pass">Password<input id="pass" name="password" type="password" autocomplete="current-password" maxlength="128" required></label>
+    <p class="msg" id="loginMsg" role="alert"></p>
+    <button class="btn px" type="submit" id="loginGo" disabled>Checking…</button>
+  </form>
+</section>
+</body>
+</html>

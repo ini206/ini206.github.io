@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-auth="pending">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600;700&display=swap">
+
+<title>Wishlist Inbox</title>
+<link rel="stylesheet" href="css/admin.css">
+<script type="module" src="js/admin.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="px">
+    <h1>WISHLIST INBOX ✉</h1>
+    <button class="btn alt px" id="out" type="button">Sign out</button>
+  </header>
+  <section id="inbox">
+    <div class="stats" id="stats"></div>
+    <p class="msg" id="inboxMsg" role="alert"></p>
+    <div id="list"><p class="muted">Loading lists…</p></div>
+  </section>
+</div>
+</body>
+</html>

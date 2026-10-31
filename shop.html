@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" data-auth="pending">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600;700&display=swap">
+
+<title>Lakeside Wishlist</title>
+<link rel="stylesheet" href="css/lake.css">
+<script src="js/world.js" defer></script>
+<script type="module" src="js/shop.js"></script>
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas>
+<button id="bye" class="px gate" type="button">⏻ BYE</button>
+
+<section class="layer gate" id="intro">
+  <div class="intro-card px">
+    <canvas class="heart" id="heart" width="10" height="9" aria-hidden="true"></canvas>
+    <h1>Are you ready for your shopping list?</h1>
+    <p>Tell me everything you want. Every little thing.</p>
+    <button class="btn px" id="start" type="button">Start ▶</button>
+  </div>
+</section>
+
+<section class="layer" id="main" hidden>
+  <div class="plaque px">MY WISHLIST <span class="count" id="count">0</span><span class="sent" id="sentTag" hidden>sent ✓</span></div>
+  <div class="hint">tap to edit · double-tap to pop</div>
+  <div class="board" id="board" aria-live="polite"></div>
+</section>
+<div class="fabs" id="fabs" hidden>
+  <button id="send" class="px" type="button" aria-label="Send my list"><span class="env">✉</span>SEND</button>
+  <button id="fab" class="px" type="button" aria-label="Add a wish">+</button>
+</div>
+
+<div id="sheet" class="overlay" hidden>
+  <form class="sheet-card px" id="form">
+    <h2 id="sheetTitle">NEW WISH ✿</h2>
+    <textarea id="txt" maxlength="160" placeholder="e.g. pink lip oil, soft blush, a cute mirror…"></textarea>
+    <div class="row">
+      <button class="btn alt px" type="button" id="cancel">Cancel</button>
+      <button class="btn px" type="submit">Save</button>
+    </div>
+  </form>
+</div>
+
+<div id="sendSheet" class="overlay" hidden>
+  <form class="sheet-card px" id="sendForm">
+    <h2>SEND TO <span id="toName">ME</span>? ✉</h2>
+    <p class="sum" id="sendSum"></p>
+    <textarea id="note" maxlength="300" placeholder="a little note for me (optional)"></textarea>
+    <p class="msg" id="sendMsg" role="alert"></p>
+    <div class="row">
+      <button class="btn alt px" type="button" id="sendCancel">Not yet</button>
+      <button class="btn px" type="submit" id="sendGo">Send ✉</button>
+    </div>
+  </form>
+  <div class="sheet-card px" id="sentCard" hidden>
+    <div class="sent-art">💌</div>
+    <h2>SENT! ✿</h2>
+    <p class="sum">Your list flew over the lake. Now act surprised.</p>
+    <div class="row"><button class="btn px" type="button" id="sentClose">Yay</button></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+/* Layout: one narrow column of pixel "letters", newest on top, over the same cyan-to-pink sunset sky as her page. */
+*{box-sizing:border-box}[hidden]{display:none!important}
+html:not([data-auth="ok"]) .wrap{visibility:hidden}
+#list{display:flex;flex-direction:column;gap:20px;margin-top:12px}
+:root{
+  color-scheme:light;
+  --ink:#2E5566; --paper:#FFF7FB; --pink:#FF9CC6; --cyan:#C9F1F7; --mint:#C8F2DD; --muted:#5E8494; --alert:#C2416F;
+  --title:"Press Start 2P", "Courier New", monospace;
+  --body:"Pixelify Sans", "Courier New", monospace;
+}
+html{min-height:100%;background:linear-gradient(180deg,#86D3EA 0%,#B9E5F0 30%,#F2DCE6 60%,#FFC3D0 85%,#FFC8BC 100%) fixed}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.4;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(24px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.px{--b:var(--ink);--f:var(--paper);background:var(--f);
+  box-shadow:0 -4px 0 0 var(--b),0 4px 0 0 var(--b),-4px 0 0 0 var(--b),4px 0 0 0 var(--b),inset 0 -4px 0 0 rgba(0,0,0,.08);margin:4px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px}
+h1{font-family:var(--title);font-size:14px;font-weight:400;margin:0;line-height:1.6}
+h2{font-family:var(--title);font-size:11px;font-weight:400;margin:0;line-height:1.6}
+.btn{font-family:var(--title);font-size:11px;cursor:pointer;border:0;color:var(--ink);padding:12px 16px;--f:var(--pink);background:var(--f)}
+.btn:hover{filter:brightness(1.05)}.btn.alt{--f:var(--paper)}.btn.danger{--f:#FFD3DF}
+.btn:focus-visible,input:focus-visible{outline:3px dashed var(--ink);outline-offset:4px}
+.btn:disabled{opacity:.5;cursor:wait}
+form.login{padding:22px 20px;display:flex;flex-direction:column;gap:14px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:600}
+input[type=email],input[type=password]{font:inherit;color:var(--ink);background:#fff;border:0;padding:10px 12px;box-shadow:inset 0 0 0 3px var(--cyan)}
+input[type=email]:focus,input[type=password]:focus{box-shadow:inset 0 0 0 3px var(--pink);outline:none}
+.msg{margin:0;color:var(--alert);min-height:1em;font-size:16px}
+.muted{color:var(--muted);margin:0}
+.stats{display:flex;gap:10px;flex-wrap:wrap;font-size:15px}
+.stats span{background:var(--cyan);padding:3px 8px;font-variant-numeric:tabular-nums}
+.letter{padding:18px;display:flex;flex-direction:column;gap:12px}
+.letter.unseen{--f:#FFF0F5}
+.letter-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.new{font-family:var(--title);font-size:9px;background:var(--pink);padding:4px 6px;margin-left:8px}
+.note{margin:0;padding:10px 12px;background:var(--cyan);font-style:italic;overflow-wrap:anywhere}
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+li label{flex-direction:row;align-items:flex-start;gap:10px;font-weight:600;cursor:pointer}
+li input{width:22px;height:22px;margin:2px 0 0;accent-color:#FF7EB6;flex:none}
+li span{min-width:0;overflow-wrap:anywhere}
+li.done span{text-decoration:line-through;color:var(--muted)}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.empty{padding:22px 18px;text-align:center}

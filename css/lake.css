@@ -1,0 +1,94 @@
+*{box-sizing:border-box}[hidden]{display:none!important}
+/* Layout: full-screen pixel winter-sunset lake scene on a canvas; UI floats on top as chunky pixel cards. Single pastel-daytime look, both host themes. */
+:root{
+  color-scheme:light;
+  --ink:#2E5566; --paper:#FFF7FB; --pink:#FF9CC6; --pink-d:#E2709F;
+  --lav:#C9F1F7; --mint:#C8F2DD; --sky:#CDEBFF; --butter:#FFF0B3; --peach:#FFD8C7;
+  --title:"Press Start 2P", "Courier New", monospace;
+  --body:"Pixelify Sans", "Courier New", monospace;
+}
+html,body{height:100%}
+body{background:#FFD3DF;color:var(--ink);font-family:var(--body);font-size:18px;margin:0;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas#world{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;z-index:0}
+.layer{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(16px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-bottom,0px))}
+
+/* chunky pixel frame: stepped corners via box-shadow */
+.px{--b:var(--ink);--f:var(--paper);background:var(--f);
+  box-shadow:0 -4px 0 0 var(--b),0 4px 0 0 var(--b),-4px 0 0 0 var(--b),4px 0 0 0 var(--b),
+             inset 0 -4px 0 0 rgba(0,0,0,.08);margin:4px}
+
+/* intro */
+#intro{align-items:center;justify-content:center}
+.intro-card{max-width:420px;width:100%;padding:28px 22px;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.intro-card h1{font-family:var(--title);font-size:clamp(14px,4.2vw,18px);line-height:1.7;margin:0;font-weight:400;text-wrap:balance}
+.intro-card p{margin:0;font-size:18px;color:#5E8494}
+.heart{display:block;width:40px;height:36px;image-rendering:pixelated;animation:bob 1.6s ease-in-out infinite}
+.btn{font-family:var(--title);font-size:13px;cursor:pointer;border:0;color:var(--ink);padding:14px 22px;--f:var(--pink);background:var(--f)}
+.btn:hover{--f:#FFB3D3}
+.btn:active{filter:brightness(.95)}
+#start{position:relative;z-index:2;touch-action:manipulation}
+.btn:focus-visible,.bubble:focus-visible,#fab:focus-visible{outline:3px dashed var(--ink);outline-offset:6px}
+.btn.alt{--f:var(--paper)}
+
+/* main */
+#main{gap:14px}
+.plaque{align-self:center;padding:10px 16px;font-family:var(--title);font-size:12px;letter-spacing:.04em;display:flex;gap:10px;align-items:center}
+.plaque .count{background:var(--pink);padding:4px 8px;font-variant-numeric:tabular-nums}
+.hint{align-self:center;font-size:15px;color:var(--ink);background:rgba(255,247,251,.8);padding:4px 10px}
+.board{flex:1;min-height:0;overflow-y:auto;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;gap:16px;padding:8px 4px 96px}
+.bubble{font-family:var(--body);font-size:19px;font-weight:600;color:var(--ink);cursor:pointer;border:0;max-width:min(320px,100%);
+  padding:12px 16px;text-align:left;overflow-wrap:anywhere;animation:bob 3.4s ease-in-out infinite;user-select:none}
+.bubble:nth-child(5n+1){--f:#FFE1EE}.bubble:nth-child(5n+2){--f:var(--lav)}.bubble:nth-child(5n+3){--f:var(--mint)}
+.bubble:nth-child(5n+4){--f:var(--sky)}.bubble:nth-child(5n){--f:var(--butter)}
+.bubble:hover,.bubble:active,.bubble.hold{animation-play-state:paused}
+.bubble.pop{animation:pop .32s steps(4) forwards}
+.bubble.new{animation:appear .35s steps(4),bob 3.4s ease-in-out .35s infinite}
+.empty{align-self:center;padding:16px 18px;max-width:340px;text-align:center}
+
+.fabs{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;align-items:center;gap:16px;z-index:2}
+#fab,#send{width:64px;height:64px;font-family:var(--title);line-height:1;cursor:pointer;border:0;color:var(--ink);background:var(--f)}
+#fab{font-size:28px;--f:var(--pink)}
+#send{font-size:8px;--f:var(--lav);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+#send .env{font-size:22px;font-family:var(--body)}
+#fab:hover{--f:#FFB3D3}#send:hover{--f:#B3EAF3}
+#fab:active,#send:active{transform:translateY(3px)}
+#send:disabled{opacity:.5;cursor:not-allowed;transform:none}
+#send:focus-visible{outline:3px dashed var(--ink);outline-offset:6px}
+.plaque .sent{font-family:var(--body);font-size:14px;background:var(--mint);padding:3px 8px}
+
+/* composer */
+.overlay{position:fixed;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(46,85,102,.35);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet-card{width:100%;max-width:420px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.sheet-card h2{font-family:var(--title);font-size:13px;margin:0;font-weight:400}
+#txt,#note{font-family:var(--body);font-size:20px;color:var(--ink);background:#FFFFFF;border:0;padding:12px;min-height:84px;resize:vertical;outline:none;
+  box-shadow:inset 0 0 0 3px var(--lav)}
+#txt:focus,#note:focus{box-shadow:inset 0 0 0 3px var(--pink)}
+.sum{margin:0;font-size:18px}
+.msg{margin:0;font-size:16px;color:#C2416F;min-height:1em}
+.sent-art{font-size:44px;text-align:center;line-height:1}
+.row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes pop{50%{transform:scale(1.15)}100%{transform:scale(0);opacity:0}}
+@keyframes appear{from{transform:scale(0)}to{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.bubble,.heart{animation:none!important}}
+
+/* ---- auth gate: nothing of her page shows until the account is verified ---- */
+html:not([data-auth="ok"]) .gate{visibility:hidden}
+#bye{position:fixed;left:calc(16px + env(safe-area-inset-left,0px));top:calc(16px + env(safe-area-inset-top,0px));z-index:2;
+  font-family:var(--title);font-size:9px;cursor:pointer;border:0;color:var(--ink);padding:9px 10px;--f:var(--paper);background:var(--f)}
+#bye:focus-visible{outline:3px dashed var(--ink);outline-offset:6px}
+
+/* ---- login ---- */
+#loginLayer{align-items:center;justify-content:center}
+.login-card{max-width:400px;width:100%;padding:26px 22px;display:flex;flex-direction:column;gap:14px}
+.login-card h1{font-family:var(--title);font-size:clamp(13px,4vw,16px);line-height:1.7;margin:0;font-weight:400;text-align:center}
+.login-card label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:17px}
+.login-card input{font-family:var(--body);font-size:19px;color:var(--ink);background:#FFFFFF;border:0;padding:10px 12px;outline:none;box-shadow:inset 0 0 0 3px var(--lav)}
+.login-card input:focus{box-shadow:inset 0 0 0 3px var(--pink)}
+.login-card .btn{align-self:stretch}
+.login-card .heart{align-self:center}
